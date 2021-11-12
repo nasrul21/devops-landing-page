@@ -1,39 +1,44 @@
-pipeline{
+pipeline {
+  agent any
+  stages {
+    stage('Build') {
+      when {
+        tag 'stg-*'
+        tag 'prod-*'
+      }
+      steps {
+        sh 'docker build -t nasrul21/devops-landing-page:$TAG_NAME .'
+      }
+    }
 
-	agent any
+    stage('Login') {
+      when {
+        tag 'stg-*'
+        tag 'prod-*'
+      }
+      steps {
+        sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+      }
+    }
 
-	environment {
-		DOCKERHUB_CREDENTIALS=credentials('dockerhub-cred')
-	}
+    stage('Push') {
+      when {
+        tag 'stg-*'
+        tag 'prod-*'
+      }
+      steps {
+        sh 'docker push nasrul21/devops-landing-page:latest'
+      }
+    }
 
-	stages {
+  }
+  environment {
+    DOCKERHUB_CREDENTIALS = credentials('dockerhub-cred')
+  }
+  post {
+    always {
+      sh 'docker logout'
+    }
 
-		stage('Build') {
-
-			steps {
-				sh 'docker build -t nasrul21/devops-landing-page:latest .'
-			}
-		}
-
-		stage('Login') {
-
-			steps {
-				sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-			}
-		}
-
-		stage('Push') {
-
-			steps {
-				sh 'docker push nasrul21/devops-landing-page:latest'
-			}
-		}
-	}
-
-	post {
-		always {
-			sh 'docker logout'
-		}
-	}
-
+  }
 }
