@@ -4,7 +4,6 @@ pipeline {
     stage('Build') {
       when {
         tag 'stg-*'
-        tag 'prod-*'
       }
       steps {
         sh 'docker build -t nasrul21/devops-landing-page:$TAG_NAME .'
@@ -14,7 +13,6 @@ pipeline {
     stage('Login') {
       when {
         tag 'stg-*'
-        tag 'prod-*'
       }
       steps {
         sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
@@ -24,7 +22,6 @@ pipeline {
     stage('Push') {
       when {
         tag 'stg-*'
-        tag 'prod-*'
       }
       steps {
         sh 'docker push nasrul21/devops-landing-page:latest'
